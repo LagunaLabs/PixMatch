@@ -22,10 +22,9 @@ extension MainViewController {
      * When the player wins the game, they have the option to add their score to the database.
      */
     func addWinningTimeToDatabase(forUser user: String, withTime time: String) {
-        /// Creates instance of the Firestore database
-        let db = Firestore.firestore()
+
         /// Sends the winning score to the the collection
-        db.collection("publicScores").document(user).setData(["time": time]) { (error) in /// "/../" gets sensitive data
+        dbF.collection("publicScores").document(user).setData(["time": time]) { (error) in /// "/../" gets sensitive data
             if error != nil {
                 print(error?.localizedDescription as Any)
                 let alertController = UIAlertController(title: "PixMatch", message: error?.localizedDescription, preferredStyle: .alert)
@@ -36,6 +35,12 @@ extension MainViewController {
                 self.show(alertController, sender: nil)
             }
         }
+    }
+    
+    @objc func getScores() {
+        print(dbF.app.options.databaseURL)
+        print(dbF.app.options.deepLinkURLScheme)
+        print(dbF.app.options.storageBucket)
     }
     
     //
@@ -180,6 +185,9 @@ extension MainViewController {
      */
     func loadUIElements(completion: (Bool) -> ()) {
         
+        view.addSubview(logoutLink)
+        logoutLink.center.x = view.center.x
+        logoutLink.center.y = view.frame.height * 0.1
         
         view.addSubview(horizStackViewMain)
         horizStackViewMain.center = view.center
