@@ -7,22 +7,46 @@
 //
 
 import LBTAComponents
+import Firebase
+import FirebaseFunctions
+import SQLite3
 import UIKit
 
 class MainViewController: UIViewController {
+    
+    // Mark: - Database
+    var db: OpaquePointer?
+    var winners = [WinInfo]()
+    
+    // Mark: - Properties
+    var pickedBoxes: [UIImageView] = []
     
     var numberOfBoxesTouched = 0 // used to run matching logic
     
     var shuffledColorsArray: [UIColor] = []
     
+    var winningTimeString = ""
+    
+    var hasStartedGame = false
+    
+    var timeInSeconds: Int = 0
+    
     var matchesIncrementer: Int = 0 {
  
         didSet {
             // run didUserWinYet logic (pause timer if won and provide user way to enter their name if score reaches top 5)
-            
+            print("There are " + String(matchesIncrementer) + " matches.")
+            if matchesIncrementer == 4 {
+                print("you won the game!")
+                timer.invalidate()
+                winningTimeString = timerLabel.text!
+                print("Your winning time is: ", winningTimeString)
+                displayWinAlert(withWinningTime: winningTimeString)
+            }
         }
-
     }
+    
+    var timer = Timer()
     
     var viewWidth: CGFloat {
         return view.frame.width
@@ -32,10 +56,21 @@ class MainViewController: UIViewController {
         return view.frame.height
     }
     
-    lazy var bottomToolBar: UIView = {
-        let vw = UIView()
-        vw.backgroundColor = UIColor.blue
-        return vw
+    // Mark: - UI Elements
+    
+    lazy var functions = Functions.functions()
+    
+    lazy var timerLabel: UILabel = {
+        let lbl = UILabel()
+        lbl.text = "0:00:00"
+        lbl.numberOfLines = 1
+        lbl.textAlignment = .center
+        // TODO: - Dynamically size
+        lbl.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        lbl.font = UIFont(name: "Arial", size: 32)
+        lbl.adjustsFontSizeToFitWidth = true
+        lbl.textColor = .white
+        return lbl
     }()
     
     lazy var vertStackViewOne: UIStackView = {
@@ -226,6 +261,7 @@ class MainViewController: UIViewController {
     lazy var newGameButton: UIButton = {
         let btn = UIButton()
         btn.setTitle("New Game", for: .normal)
+        btn.titleLabel?.adjustsFontSizeToFitWidth = true
         btn.setTitleColor(.white, for: .normal)
         btn.backgroundColor = .blue
         btn.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
@@ -234,12 +270,14 @@ class MainViewController: UIViewController {
         btn.layer.shadowRadius = 8
         btn.layer.shadowOffset = .zero
         btn.layer.shadowOpacity = 0.5
+        btn.addTarget(self, action: #selector(resetForNewGame), for: .touchUpInside)
         return btn
     }()
     
     lazy var seeTopScoresButton: UIButton = {
         let btn = UIButton()
         btn.setTitle("Best Times", for: .normal)
+        btn.titleLabel?.adjustsFontSizeToFitWidth = true
         btn.setTitleColor(.white, for: .normal)
         btn.backgroundColor = .blue
         btn.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
@@ -248,8 +286,11 @@ class MainViewController: UIViewController {
         btn.layer.shadowRadius = 8
         btn.layer.shadowOffset = .zero
         btn.layer.shadowOpacity = 0.5
+        btn.addTarget(self, action: #selector(testFirebaseFunctions), for: .touchUpInside)
         return btn
     }()
+    
+    // Mark: - Methods
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
@@ -258,6 +299,25 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.black
+        
+        let fileURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        .appendingPathComponent("testTEST.sqlite")
+        var d: OpaquePointer?
+        
+        if sqlite3_open(fileURL.path, &d) != SQLITE_OK {
+            print("error opening database")
+        } else {
+            db = d
+            print("Successfully opened connection to database at \(fileURL.path)")
+        }
+        
+        let query = "CREATE TABLE IF NOT EXISTS Winners (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, time TEXT)"
+        
+        if sqlite3_exec(db, query, nil, nil, nil) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            print("error creating table: \(errmsg)")
+        }
+        
         DispatchQueue.main.async {
             self.loadUIElements { (success) in
                 if success {
@@ -265,127 +325,9 @@ class MainViewController: UIViewController {
                 }
             }
         }
-        
-        
+        randomizeColorsAndBoxArrays()
     }
-    
-    func loadUIElements(completion: (Bool) -> ()) {
-        
-        
-        view.addSubview(horizStackViewMain)
-        horizStackViewMain.center = view.center
-        
-        vertStackViewOne.insertArrangedSubview(boxOne, at: 0)
-        vertStackViewOne.insertArrangedSubview(boxTwo, at: 1)
-        vertStackViewOne.insertArrangedSubview(boxThree, at: 2)
-        horizStackViewMain.insertArrangedSubview(vertStackViewOne, at: 0)
-        
-        vertStackViewTwo.insertArrangedSubview(boxFour, at: 0)
-        vertStackViewTwo.insertArrangedSubview(middleBox, at: 1)
-        vertStackViewTwo.insertArrangedSubview(boxFive, at: 2)
-        horizStackViewMain.insertArrangedSubview(vertStackViewTwo, at: 1)
-        
-        vertStackViewThree.insertArrangedSubview(boxSix, at: 0)
-        vertStackViewThree.insertArrangedSubview(boxSeven, at: 1)
-        vertStackViewThree.insertArrangedSubview(boxEight, at: 2)
-        horizStackViewMain.insertArrangedSubview(vertStackViewThree, at: 2)
-        
-        view.addSubview(seeTopScoresButton)
-        var widthAndHeightOfButtons: Float = 0
-        if (horizStackViewMain.frame.width / 3) > 120 {
-            widthAndHeightOfButtons = 120
-        } else if (horizStackViewMain.frame.width / 3) < 103.5 {
-            widthAndHeightOfButtons = Float((horizStackViewMain.frame.width / 3) - horizStackViewMain.spacing)
-        } else {
-            widthAndHeightOfButtons = Float((horizStackViewMain.frame.width / 3) - horizStackViewMain.spacing)
-        }
-        
-        seeTopScoresButton.anchor(boxThree.bottomAnchor, left: boxThree.leftAnchor, bottom: nil, right: nil, topConstant: 64, leftConstant: ((horizStackViewMain.frame.width / 3) - horizStackViewMain.spacing - CGFloat(widthAndHeightOfButtons)) / 2, bottomConstant: 0, rightConstant: 0, widthConstant: CGFloat(widthAndHeightOfButtons), heightConstant: CGFloat(widthAndHeightOfButtons))
-        seeTopScoresButton.layer.cornerRadius = CGFloat(widthAndHeightOfButtons / 2)
-        
-        view.addSubview(newGameButton)
-        newGameButton.anchor(boxEight.bottomAnchor, left: boxEight.leftAnchor, bottom: nil, right: nil, topConstant: 64, leftConstant: ((horizStackViewMain.frame.width / 3) - horizStackViewMain.spacing - CGFloat(widthAndHeightOfButtons)) / 2, bottomConstant: 0, rightConstant: 0, widthConstant: CGFloat(widthAndHeightOfButtons), heightConstant: CGFloat(widthAndHeightOfButtons))
-        newGameButton.layer.cornerRadius = CGFloat(widthAndHeightOfButtons / 2)
-        
-        // Assign random pairs of colors to each box
-        // Colors used for 8 boxes will be 4 pairs. (Gold - #D8AB4C; Red - #F71735; Aqua - #41EAD4; White - #FDFFFC)
-        
-        let boxArray: [UIImageView] = [boxOne, boxTwo, boxThree, boxFour, boxFive, boxSix, boxSeven, boxEight]
-        let shuffledBoxArray = boxArray.shuffled()
-        let boxColorArray = [BoxColors.gold, BoxColors.aqua, BoxColors.red, BoxColors.white]
-        let shuffledBoxColorArray = boxColorArray.shuffled()
 
-        var count = 0
-        var assignedColor: UIColor = shuffledBoxColorArray[0]
-        
-        while count < 8 {
-            shuffledColorsArray.append(assignedColor)
-            count += 1
-            guard count < shuffledBoxArray.count else {continue}
-            if count % 2 == 0 { assignedColor = shuffledBoxColorArray[count / 2]}
-        }
-
-        print("Shuffled colors:", shuffledColorsArray)
-        completion(true)
-    }
-    
-    func matchingLogic() {
-        if (pickedBoxes[0].backgroundColor?.isEqual(pickedBoxes[1].backgroundColor))! {
-            print("Colors match")
-        } else {
-            print("Colors do not match")
-            UIView.animate(withDuration: 1.5) {
-                self.pickedBoxes[0].backgroundColor = .darkGray
-                self.pickedBoxes[1].backgroundColor = .darkGray
-            }
-            
-        }
-        pickedBoxes = [] // reset array
-    }
-    
-    var pickedBoxes: [UIImageView] = []
-    
-    @objc func flipOverCard(_ sender: UITapGestureRecognizer) {
-        
-        
-        guard let tag = sender.view?.tag else { return }
-        switch tag {
-        case boxOne.tag:
-            boxOne.backgroundColor = shuffledColorsArray[0]
-            pickedBoxes.append(boxOne)
-        case boxTwo.tag:
-            boxTwo.backgroundColor = shuffledColorsArray[1]
-            pickedBoxes.append(boxTwo)
-        case boxThree.tag:
-            boxThree.backgroundColor = shuffledColorsArray[2]
-            pickedBoxes.append(boxThree)
-        case boxFour.tag:
-            boxFour.backgroundColor = shuffledColorsArray[3]
-            pickedBoxes.append(boxFour)
-        case boxFive.tag:
-            boxFive.backgroundColor = shuffledColorsArray[4]
-            pickedBoxes.append(boxFive)
-        case boxSix.tag:
-            boxSix.backgroundColor = shuffledColorsArray[5]
-            pickedBoxes.append(boxSix)
-        case boxSeven.tag:
-            boxSeven.backgroundColor = shuffledColorsArray[6]
-            pickedBoxes.append(boxSeven)
-        case boxEight.tag:
-            boxEight.backgroundColor = shuffledColorsArray[7]
-            pickedBoxes.append(boxEight)
-        default:
-            break
-        }
-        numberOfBoxesTouched += 1
-        if numberOfBoxesTouched == 2 {numberOfBoxesTouched = 0; print("Run matching logic"); matchingLogic()}
-    }
 }
 
-// TODO: - Create an initializer extension for UIColor to take a hex string and convert to a color
-struct BoxColors {
-    static let gold  = UIColor(r: 216, g: 171, b: 76)  // Vanderbilt gold
-    static let red   = UIColor(r: 247, g: 23,  b: 53)  // derived with color pallete generator
-    static let aqua  = UIColor(r: 65,  g: 234, b: 212) // derived with color pallete generator
-    static let white = UIColor(r: 253, g: 255, b: 252) // derived with color pallete generator
-}
+

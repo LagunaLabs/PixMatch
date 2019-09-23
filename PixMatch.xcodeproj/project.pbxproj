@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C1081BD2335A42800CD1F7E /* MainViewController+helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1081BC2335A42800CD1F7E /* MainViewController+helpers.swift */; };
+		0C1081BF2335A5B200CD1F7E /* BoxColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1081BE2335A5B200CD1F7E /* BoxColors.swift */; };
 		0C429EDF233452EF00565FB0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C429EDE233452EF00565FB0 /* AppDelegate.swift */; };
 		0C429EE7233452EF00565FB0 /* PixMatch.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0C429EE5233452EF00565FB0 /* PixMatch.xcdatamodeld */; };
 		0C429EE9233452F000565FB0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C429EE8233452F000565FB0 /* Assets.xcassets */; };
@@ -14,6 +16,9 @@
 		0C429EF7233452F000565FB0 /* PixMatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C429EF6233452F000565FB0 /* PixMatchTests.swift */; };
 		0C429F02233454A700565FB0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0C429F01233454A700565FB0 /* GoogleService-Info.plist */; };
 		0C429F042334550100565FB0 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C429F032334550100565FB0 /* MainViewController.swift */; };
+		0C429F0623354D1600565FB0 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C429F0523354D1600565FB0 /* Format.swift */; };
+		0C429F08233563A700565FB0 /* WinInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C429F07233563A700565FB0 /* WinInfo.swift */; };
+		0C959A972338498000F5ED77 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C959A962338498000F5ED77 /* Common.swift */; };
 		AEBEA5B21D38EEB1A7FDDDEB /* Pods_PixMatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A9B04524E9F6E7B2D66C755 /* Pods_PixMatch.framework */; };
 		B3E78937DCE0A834A112347B /* Pods_PixMatchTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0858EFFC4503A2527DE06C5 /* Pods_PixMatchTests.framework */; };
 /* End PBXBuildFile section */
@@ -30,6 +35,8 @@
 
 /* Begin PBXFileReference section */
 		0A9B04524E9F6E7B2D66C755 /* Pods_PixMatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PixMatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C1081BC2335A42800CD1F7E /* MainViewController+helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+helpers.swift"; sourceTree = "<group>"; };
+		0C1081BE2335A5B200CD1F7E /* BoxColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxColors.swift; sourceTree = "<group>"; };
 		0C429EDB233452EF00565FB0 /* PixMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PixMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C429EDE233452EF00565FB0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0C429EE6233452EF00565FB0 /* PixMatch.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PixMatch.xcdatamodel; sourceTree = "<group>"; };
@@ -41,6 +48,9 @@
 		0C429EF8233452F000565FB0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0C429F01233454A700565FB0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0C429F032334550100565FB0 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		0C429F0523354D1600565FB0 /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
+		0C429F07233563A700565FB0 /* WinInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinInfo.swift; sourceTree = "<group>"; };
+		0C959A962338498000F5ED77 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		9FA68ED99115081988FBE996 /* Pods-PixMatchTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PixMatchTests.debug.xcconfig"; path = "Target Support Files/Pods-PixMatchTests/Pods-PixMatchTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A0858EFFC4503A2527DE06C5 /* Pods_PixMatchTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PixMatchTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C515C72114BBAFB6FF2F4F61 /* Pods-PixMatch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PixMatch.release.xcconfig"; path = "Target Support Files/Pods-PixMatch/Pods-PixMatch.release.xcconfig"; sourceTree = "<group>"; };
@@ -68,6 +78,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0C1081B92335A3D000CD1F7E /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				0C1081BC2335A42800CD1F7E /* MainViewController+helpers.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		0C1081BA2335A3E300CD1F7E /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				0C429F032334550100565FB0 /* MainViewController.swift */,
+			);
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		0C1081BB2335A3FA00CD1F7E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0C429F0523354D1600565FB0 /* Format.swift */,
+				0C429F07233563A700565FB0 /* WinInfo.swift */,
+				0C1081BE2335A5B200CD1F7E /* BoxColors.swift */,
+				0C959A962338498000F5ED77 /* Common.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		0C429ED2233452EF00565FB0 = {
 			isa = PBXGroup;
 			children = (
@@ -91,8 +128,10 @@
 		0C429EDD233452EF00565FB0 /* PixMatch */ = {
 			isa = PBXGroup;
 			children = (
+				0C1081BB2335A3FA00CD1F7E /* Models */,
+				0C1081BA2335A3E300CD1F7E /* ViewControllers */,
+				0C1081B92335A3D000CD1F7E /* Helpers */,
 				0C429EDE233452EF00565FB0 /* AppDelegate.swift */,
-				0C429F032334550100565FB0 /* MainViewController.swift */,
 				0C429EE8233452F000565FB0 /* Assets.xcassets */,
 				0C429EEA233452F000565FB0 /* LaunchScreen.storyboard */,
 				0C429EED233452F000565FB0 /* Info.plist */,
@@ -299,8 +338,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0C959A972338498000F5ED77 /* Common.swift in Sources */,
+				0C429F0623354D1600565FB0 /* Format.swift in Sources */,
 				0C429F042334550100565FB0 /* MainViewController.swift in Sources */,
+				0C1081BD2335A42800CD1F7E /* MainViewController+helpers.swift in Sources */,
 				0C429EE7233452EF00565FB0 /* PixMatch.xcdatamodeld in Sources */,
+				0C1081BF2335A5B200CD1F7E /* BoxColors.swift in Sources */,
+				0C429F08233563A700565FB0 /* WinInfo.swift in Sources */,
 				0C429EDF233452EF00565FB0 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
